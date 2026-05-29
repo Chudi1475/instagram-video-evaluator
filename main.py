@@ -1,4 +1,15 @@
 """CLI entry point: download -> audio -> transcribe -> frames -> evaluate -> report."""
+import sys
+
+# Force UTF-8 on stdout/stderr. Windows consoles default to cp1252, which raises
+# UnicodeEncodeError when printing an evaluation that contains emojis or smart quotes
+# (the saved report is already written as UTF-8; this only protects the terminal echo).
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, ValueError):
+    pass
+
 # Load .env into the environment before importing config (which reads os.getenv at
 # import time). override=True so .env wins even if a stale/empty var (e.g. an empty
 # ANTHROPIC_API_KEY) is already present in the parent environment. Optional dependency:
