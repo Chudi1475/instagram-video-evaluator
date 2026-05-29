@@ -1,10 +1,12 @@
 """CLI entry point: download -> audio -> transcribe -> frames -> evaluate -> report."""
 # Load .env into the environment before importing config (which reads os.getenv at
-# import time). Optional dependency: if python-dotenv isn't installed, env vars set
-# manually in the shell still work, and `python main.py --help` runs with nothing installed.
+# import time). override=True so .env wins even if a stale/empty var (e.g. an empty
+# ANTHROPIC_API_KEY) is already present in the parent environment. Optional dependency:
+# if python-dotenv isn't installed, env vars set manually in the shell still work, and
+# `python main.py --help` runs with nothing installed.
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(override=True)
 except ImportError:
     pass
 
