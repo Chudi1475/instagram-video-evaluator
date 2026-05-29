@@ -1,0 +1,6 @@
+yt-dlp
+groq
+faster-whisper
+anthropic
+pillow
+imagehash
