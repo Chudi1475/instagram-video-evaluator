@@ -22,8 +22,13 @@ Frames go straight to Claude vision (no separate OCR).
 
 ## Running
 python main.py "<instagram_url>"
+python main.py "C:\path\to\video.mp4"                            # local file instead of a URL
 python main.py "<instagram_url>" --cookies-from-browser chrome   # if download blocked
 python main.py "<instagram_url>" --prompt "your custom evaluation question"
+
+The positional arg accepts either an Instagram URL or a path to a local video file.
+If it resolves to an existing file (Path.is_file()), the download step is skipped and
+the file is used directly; otherwise it's treated as a URL and fetched with yt-dlp.
 
 ## Keys
 ANTHROPIC_API_KEY (required), GROQ_API_KEY (required unless IGV_TRANSCRIBE_BACKEND=local).

@@ -22,6 +22,7 @@ except ImportError:
     pass
 
 import argparse
+from pathlib import Path
 
 import config
 import download
@@ -50,10 +51,18 @@ DEFAULT_EVAL_PROMPT = (
 )
 
 
-def run(url, cookies_browser, eval_prompt, system_prompt):
+def run(source, cookies_browser, eval_prompt, system_prompt):
     work = config.WORK_DIR
-    print(f"[1/5] Downloading {url} ...")
-    video_path = download.download_video(url, work, cookies_browser)
+    work.mkdir(parents=True, exist_ok=True)
+
+    # source can be an Instagram URL or a path to a local video file already on disk.
+    src_path = Path(source)
+    if src_path.is_file():
+        print(f"[1/5] Using local video file: {src_path} ...")
+        video_path = src_path
+    else:
+        print(f"[1/5] Downloading {source} ...")
+        video_path = download.download_video(source, work, cookies_browser)
 
     print("[2/5] Extracting audio ...")
     audio_path = audio.extract_audio(video_path, work)
@@ -71,7 +80,7 @@ def run(url, cookies_browser, eval_prompt, system_prompt):
     evaluation = evaluate_mod.evaluate(segments, kept, eval_prompt, system_prompt)
 
     out_path = work / "evaluation.md"
-    report.write_report(url, segments, kept, evaluation, out_path)
+    report.write_report(source, segments, kept, evaluation, out_path)
     print(f"\nDone. Report written to: {out_path}\n")
     print("=" * 60)
     print(evaluation)
@@ -80,16 +89,19 @@ def run(url, cookies_browser, eval_prompt, system_prompt):
 
 def main():
     p = argparse.ArgumentParser(
-        description="Evaluate an Instagram video using its speech and on-screen text."
+        description="Evaluate a video (Instagram URL or local file) using its speech "
+                    "and on-screen text."
     )
-    p.add_argument("url", help="Instagram Reel/post URL")
+    p.add_argument("source",
+                   help="Instagram Reel/post URL, or path to a local video file "
+                        "(mp4, mov, mkv, webm, ...)")
     p.add_argument("--cookies-from-browser", default=None,
                    help="Browser to pull cookies from if the download is blocked "
                         "(chrome/safari/firefox/edge/brave)")
     p.add_argument("--prompt", default=DEFAULT_EVAL_PROMPT, help="Evaluation instructions")
     p.add_argument("--system", default=DEFAULT_SYSTEM_PROMPT, help="System prompt")
     args = p.parse_args()
-    run(args.url, args.cookies_from_browser, args.prompt, args.system)
+    run(args.source, args.cookies_from_browser, args.prompt, args.system)
 
 
 if __name__ == "__main__":
