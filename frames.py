@@ -11,6 +11,10 @@ import config
 def extract_frames(video_path: Path, work_dir: Path) -> list[tuple[float, Path]]:
     frames_dir = work_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
+    # Clear frames from a previous run so a shorter new video can't inherit stale
+    # trailing frames (ffmpeg only overwrites up to the new video's frame count).
+    for stale in frames_dir.glob("frame_*.jpg"):
+        stale.unlink()
     out_template = str(frames_dir / "frame_%05d.jpg")
     cmd = [
         "ffmpeg", "-y",

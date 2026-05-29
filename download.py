@@ -5,6 +5,11 @@ from pathlib import Path
 
 def download_video(url: str, work_dir: Path, cookies_browser: str | None = None) -> Path:
     work_dir.mkdir(parents=True, exist_ok=True)
+    # Remove any video from a previous run; otherwise yt-dlp sees the existing
+    # work/video.mp4, prints "has already been downloaded", and skips the fetch --
+    # leaving the pipeline to analyze the old clip instead of this URL.
+    for stale in work_dir.glob("video.*"):
+        stale.unlink()
     out_template = str(work_dir / "video.%(ext)s")
     cmd = [
         "yt-dlp",
